@@ -1,0 +1,85 @@
+<aura:component implements="force:appHostable" controller="EventUIController">
+    <!-- Required Scripts/Styles -->
+    <ltng:require styles="/resource/SLDS/assets/styles/salesforce-lightning-design-system-ltng.css" />
+    <ltng:require scripts="/resource/lodash"/>
+    <!-- Attributes -->
+    <aura:attribute name="eventId" type="Id" required="true" default="" description="" />
+    <aura:attribute name="isInitialized" type="Boolean" default="false" description="Is doInit called?" />
+    <aura:attribute name="isDirty" type="Boolean" default="false" description="Are items changed?" />
+    <aura:attribute name="searchString" type="String" description="The search string to find." />
+    <aura:attribute name="matches" type="List" description="The resulting matches returned by the Apex controller." />
+    <aura:attribute name="items" type="List" description="Selecetd event attendees" />
+    <aura:attribute name="loadMethod" type="String" required="true" default="loadMeetingAttendees" description="Load method on server" />
+    <aura:attribute name="saveMethod" type="String" required="true" default="saveMeetingAttendees" description="Save method on server" />
+    <!-- Methods -->
+    <aura:method name="post" action="{!c.doSave}" access="GLOBAL" description="Post method to be called externally"/>
+    <!-- Event handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <!-- User Interface -->
+    <!-- Spinner -->
+    <c:spinner label="Loading..."
+               class="slds-spinner--large slds-m-top--xxx-small slds-hide"
+               image="/resource/SLDS/assets/images/spinners/slds_spinner_brand.gif"/>
+      
+    <!-- Contact lookup -->
+    <div class="slds">
+            <div aura:id="lookup-div" class="slds-lookup slds-has-selection" data-select="multi" data-scope="single" data-typeahead="true">
+                <!-- This is the Input form markup -->
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                        <c:svg class="slds-input__icon" xlinkHref="/resource/SLDS/assets/icons/utility-sprite/svg/symbols.svg#search" />
+                        <!-- This markup is for when searching for a string -->
+                        <ui:inputText aura:id="lookup" placeholder="Search for meeting attendees" value="{!v.searchString}" class="slds-input" 
+                                      updateOn="keyup" keyup="{!c.doSearch}" blur="{!c.doBlur}" />
+                    </div>
+                </div>
+                <!-- This is the lookup list markup. Initially it's hidden -->
+                <div aura:id="lookuplist" class="slds-lookup__menu slds-hide" role="listbox">
+                    <div class="slds-lookup__item">
+                        <button class="slds-button"> 
+                            <c:svg class="slds-icon slds-icon-text-default slds-icon--small" xlinkHref="/resource/SLDS/assets/icons/utility-sprite/svg/symbols.svg#search" />
+                            &quot;{!v.searchString}&quot; in contacts
+                        </button>
+                    </div>
+                    <ul aura:id="lookuplist-items" class="slds-lookup__list" role="presentation">
+                        <aura:iteration items="{!v.matches}" var="match">
+                            <li class="slds-lookup__item">
+                                <a id="{!match.Id}" role="option" onclick="{!c.addItem}">
+                                   <c:svg class="slds-icon slds-icon-standard-contact slds-icon--small" xlinkHref="/resource/SLDS/assets/icons/standard-sprite/svg/symbols.svg#contact" />
+                                   {!match.Name},&nbsp;{!match.Title}&nbsp;-&nbsp;{!match.Account.Name}
+                                </a>
+                            </li>
+                        </aura:iteration>
+                    </ul>
+                </div>
+            </div>
+    </div>    
+    <!-- Selected meeting attendees -->
+    <label class="slds-form-element__label" for="lookup">{!v.label}</label> 
+       <aura:if isTrue="{!v.items.length>0}">
+         <!-- This is the existing item list markup. -->
+         <div aura:id="itemList" class="slds-col slds-m-right--x-medium slds-show" role="listbox">
+            <div class="slds-col"></div>
+            <ul aura:id="items" class="slds-lookup__list" role="presentation">
+             <aura:iteration items="{!v.items}" var="item">
+                <li id="{!'_item' + item.Id}" class="slds-list__item slds-pill">
+                <div class="slds-media slds-tile">
+                   <div class="slds-media__figure">
+                      <c:svg class="slds-icon slds-icon-standard-contact slds-icon--medium" xlinkHref="/resource/SLDS/assets/icons/standard-sprite/svg/symbols.svg#contact"/>
+                   </div>        
+                <div class="slds-media__body">
+                   <p class="slds-tile__title slds-truncate"><a class="slds-pill__label" title="{!item.Account.Name + ', ' + item.Title}">{!item.Name}</a></p>
+                </div>
+                <button id="{!item.Id}" class="slds-button slds-button--icon-bare" onclick="{!c.doRemove}">
+                  <c:svg class="slds-button__icon" xlinkHref="/resource/SLDS/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                  <span class="slds-assistive-text">Remove</span>
+                </button>      
+               </div>
+              </li>
+            </aura:iteration>
+          </ul>
+       </div>
+    </aura:if> 
+    
+</aura:component>

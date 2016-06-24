@@ -1,0 +1,22 @@
+Lightning component
+MeetingAttendeeMultiSelect.cmp
+
+Lightning App
+MeetingAttendeeMultiSelectApp
+
+Apex Class
+EventUIController - server side controller
+
+Visualforce page
+Meeting_Attendee_MultiSelect.page
+
+
+Static Resources:
+* lodash - A modern JavaScript utility library delivering modularity, performance, & extras  
+https://lodash.com/
+
+
+* SLDS - Salesforce Lightning Design System
+https://www.lightningdesignsystem.com/resources/downloads/
+
+To Use this component please see WIKI page -->
